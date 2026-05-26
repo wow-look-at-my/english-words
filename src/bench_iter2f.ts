@@ -232,7 +232,9 @@ console.log("\n=== BPE on combo-mapped desc r22 with varying merge counts ===");
   // Find how many values are actually used
   const usedVals = new Set<number>();
   for (const b of edges) usedVals.add(b);
-  const maxUsed = Math.max(...usedVals) + 1;
+  let maxUsedVal = 0;
+  for (const v of usedVals) if (v > maxUsedVal) maxUsedVal = v;
+  const maxUsed = maxUsedVal + 1;
   console.log(`  Max used value: ${maxUsed - 1}, can fit ${256 - maxUsed} BPE merges in 1 byte`);
 
   for (const maxMerges of [16, 32, 48, 64, 96, 128, 192, 256, 512, 1024]) {
@@ -292,7 +294,9 @@ console.log("\n=== BPE on standard DFS (desc+upper5+r22) ===");
   const dfs = genStandardDFS(22, "desc", "upper5");
   const usedVals = new Set<number>();
   for (const b of dfs) usedVals.add(b);
-  const maxUsed = Math.max(...usedVals) + 1;
+  let maxUsedVal = 0;
+  for (const v of usedVals) if (v > maxUsedVal) maxUsedVal = v;
+  const maxUsed = maxUsedVal + 1;
   console.log(`  Max used value: ${maxUsed - 1}, can fit ${256 - maxUsed} BPE merges in 1 byte`);
 
   for (const maxMerges of [48, 96, 256, 512, 1024]) {
@@ -337,7 +341,9 @@ console.log("\n=== BPE on standard DFS (asc, lower5, rot=0) ===");
   const dfs = genStandardDFS(0, "asc", "lower5");
   const usedVals = new Set<number>();
   for (const b of dfs) usedVals.add(b);
-  const maxUsed = Math.max(...usedVals) + 1;
+  let maxUsedVal = 0;
+  for (const v of usedVals) if (v > maxUsedVal) maxUsedVal = v;
+  const maxUsed = maxUsedVal + 1;
 
   for (const maxMerges of [48, 96, 256, 512, 1024]) {
     const { symbols, mergeTable } = applyBPE16(dfs, maxUsed, maxMerges);
@@ -395,7 +401,9 @@ console.log("\n=== BPE on front-coded word list ===");
   const fcData = new Uint8Array(fcBuf);
   const usedVals = new Set<number>();
   for (const b of fcData) usedVals.add(b);
-  const maxUsed = Math.max(...usedVals) + 1;
+  let maxUsedVal = 0;
+  for (const v of usedVals) if (v > maxUsedVal) maxUsedVal = v;
+  const maxUsed = maxUsedVal + 1;
   console.log(`  Front-coded: ${fcData.length} bytes, maxUsed=${maxUsed - 1}`);
 
   for (const maxMerges of [48, 128, 256, 512, 1024, 2048]) {
