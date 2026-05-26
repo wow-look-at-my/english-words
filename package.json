@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "compress": "tsx src/compress.ts",
+    "build:lib": "tsc",
+    "build": "npm run compress && npm run build:lib"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}
