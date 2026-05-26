@@ -7,7 +7,7 @@ Served via GitHub Pages as a lightweight dictionary CDN.
 
 ## CDN Usage
 
-The binary format (`words_alpha.dict.bin`) is ~2 MB raw, ~884 KB gzipped.
+The binary format (`words_alpha.dict.bin`) is ~1 MB raw, ~589 KB gzipped.
 A TypeScript decompressor is provided:
 
 ```typescript
@@ -15,29 +15,33 @@ import { decompress } from 'https://wow-look-at-my.github.io/english-words/decom
 
 const resp = await fetch('https://wow-look-at-my.github.io/english-words/words_alpha.dict.bin');
 const buf = new Uint8Array(await resp.arrayBuffer());
-const words = decompress(buf); // string[], 370105 words
+const words = decompress(buf); // string[], 370105 words sorted alphabetically
 ```
 
 ## Files
 
 | File | Format | Size |
 |------|--------|------|
-| `words_alpha.dict.bin` | Binary (length-grouped, front-coded) | ~2 MB |
-| `words_alpha.dict.bin.gz` | Gzipped binary | ~884 KB |
+| `words_alpha.dict.bin` | Binary (DFS-serialized trie) | ~1 MB |
+| `words_alpha.dict.bin.gz` | Gzipped binary | ~589 KB |
 | `words_alpha.txt` | Plain text (one word per line) | 4.1 MB |
 
-## Binary Format (EWD v2)
+## Binary Format
 
-Words are grouped by length and front-coded within each group:
+The dictionary is stored as a DFS-serialized trie. Shared prefixes are represented
+once. Each trie edge is encoded as a single byte:
 
 ```
-Header: 'EWD' 0x02 max_len:u8 counts[max_len]:u32le
-Body per group (length L, count C):
-  C words, each: shared:u8 suffix[L-shared]:u8 (char = 0..25)
-  sorted alphabetically, front-coded against previous word
+Header: 4 bytes (word count as uint32 LE)
+
+Body: 1 byte per trie edge (DFS order)
+  bits 0-4: character (0-25 for a-z)
+  bit 5:    end-of-word (this edge completes a valid word)
+  bit 6:    has children (the target node has outgoing edges)
+  bit 7:    last sibling (last child of the parent node)
 ```
 
-No separators or terminators needed -- all words in a group share the same length.
+45% smaller than gzipping the plain text.
 
 ## Building
 

@@ -19,13 +19,13 @@
 <tbody>
 <tr>
   <td><a href="words_alpha.dict.bin">words_alpha.dict.bin</a></td>
-  <td>Binary (length-grouped, front-coded)</td>
-  <td class="r">~2 MB</td>
+  <td>Binary (DFS-serialized trie)</td>
+  <td class="r">~1 MB</td>
 </tr>
 <tr>
   <td><a href="words_alpha.dict.bin.gz">words_alpha.dict.bin.gz</a></td>
   <td>Gzipped binary</td>
-  <td class="r">~884 KB</td>
+  <td class="r">~589 KB</td>
 </tr>
 <tr>
   <td><a href="words_alpha.txt">words_alpha.txt</a></td>
@@ -35,7 +35,7 @@
 <tr>
   <td><a href="decompress.js">decompress.js</a></td>
   <td>ES module decompressor</td>
-  <td class="r">~1 KB</td>
+  <td class="r">~0.5 KB</td>
 </tr>
 </tbody>
 </table>
@@ -50,7 +50,7 @@ const words = (await resp.text()).split('\n').filter(Boolean);</code></pre>
 
 const resp = await fetch('https://wow-look-at-my.github.io/english-words/words_alpha.dict.bin');
 const buf = new Uint8Array(await resp.arrayBuffer());
-const words = decompress(buf); // string[], 370,105 words</code></pre>
+const words = decompress(buf); // string[], 370,105 words sorted alphabetically</code></pre>
 
 <h3>Gzipped binary (smallest download)</h3>
 <pre><code>import { decompress } from 'https://wow-look-at-my.github.io/english-words/decompress.js';
@@ -61,21 +61,18 @@ const decompressed = resp.body.pipeThrough(ds);
 const buf = new Uint8Array(await new Response(decompressed).arrayBuffer());
 const words = decompress(buf);</code></pre>
 
-<h2>Binary format spec (EWD v2)</h2>
-<p>Words are grouped by character length. Within each group, words are sorted
-alphabetically and front-coded against the previous word. Characters are stored
-as byte values 0&ndash;25 (a&ndash;z). No separators or terminators are needed
-since all words in a group share the same length.</p>
-<pre><code>Header:
-  bytes 0-3    magic "EWD\x02"
-  byte  4      max_len (maximum word length)
-  bytes 5..    max_len x uint32le (word count per length)
+<h2>Binary format spec</h2>
+<p>The <code>.dict.bin</code> format is a DFS-serialized trie. The entire dictionary
+is stored as a tree where shared prefixes are represented once. Each trie edge
+is encoded as a single byte:</p>
+<pre><code>Header: 4 bytes (word count as uint32 LE)
 
-Body (per group, length L, count C):
-  C words, each encoded as:
-    1 byte: shared prefix length with previous word
-    (L - shared) bytes: suffix characters (0-25)
-</code></pre>
+Body: 1 byte per trie edge (DFS order)
+  bits 0-4: character (0-25 for a-z)
+  bit 5:    end-of-word (this edge completes a valid word)
+  bit 6:    has children (the target node has outgoing edges)
+  bit 7:    last sibling (last child of the parent node)</code></pre>
+<p>1 MB raw, 589 KB gzipped &mdash; 45% smaller than gzipping the plain text.</p>
 
 <h2>Source</h2>
 <p><a href="https://github.com/wow-look-at-my/english-words">github.com/wow-look-at-my/english-words</a></p>
