@@ -2,6 +2,7 @@ name: Deploy PR previews
 
 on:
     push:
+        branches: [master]
     pull_request:
         types: [opened, reopened, synchronize, closed]
 
@@ -30,7 +31,7 @@ jobs:
 
     deploy-preview:
         needs: build
-        if: always() && (github.event_name == 'pull_request' || github.ref == 'refs/heads/master')
+        if: always()
         uses: PazerOP/pr-preview-action/.github/workflows/preview.yml@master
         with:
             artifact-name: build
