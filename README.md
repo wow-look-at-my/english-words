@@ -1,23 +1,55 @@
 List Of English Words
 =============
 
-A text file containing over 466k English words.
+370,105 English words, available as plain text and a compact binary format.
 
-While searching for a list of english words (for an auto-complete tutorial)
-I found: https://stackoverflow.com/questions/2213607/how-to-get-english-language-word-database which refers to [https://www.infochimps.com/datasets/word-list-350000-simple-english-words-excel-readable](https://web.archive.org/web/20131118073324/https://www.infochimps.com/datasets/word-list-350000-simple-english-words-excel-readable) (archived).
+Served via GitHub Pages as a lightweight dictionary CDN.
 
-No idea why infochimps put the word list inside an excel (.xls) file.
+## CDN Usage
 
-I pulled out the words into a simple new-line-delimited text file.
-Which is more useful when building apps or importing into databases etc.
+The binary format (`words_alpha.dict.bin`) is 1004 KB raw, 589 KB gzipped.
+A TypeScript decompressor is provided:
 
-Copyright still belongs to them.
+```typescript
+import { decompress } from 'https://wow-look-at-my.github.io/english-words/decompress.js';
 
-Files you may be interested in:
+const resp = await fetch('https://wow-look-at-my.github.io/english-words/words_alpha.dict.bin');
+const buf = new Uint8Array(await resp.arrayBuffer());
+const words = decompress(buf); // string[], 370105 words sorted alphabetically
+```
 
--  [words.txt](words.txt) contains all words.
--  [words_alpha.txt](words_alpha.txt) contains only [[:alpha:]] words (words that only have letters, no numbers or symbols). If you want a quick solution choose this.
--  [words_dictionary.json](words_dictionary.json) contains all the words from words_alpha.txt as json format. 
-If you are using Python, you can easily load this file and use it as a dictionary for faster performance. All the words are assigned with 1 in the dictionary.
+## Files
 
-See [read_english_dictionary.py](read_english_dictionary.py) for example usage.
+| File | Format | Size |
+|------|--------|------|
+| `words_alpha.dict.bin` | Binary (DFS-serialized trie) | 1004 KB |
+| `words_alpha.dict.bin.gz` | Gzipped binary | 589 KB |
+| `words_alpha.txt` | Plain text (one word per line) | 4136 KB |
+
+## Binary Format
+
+The dictionary is stored as a DFS-serialized trie. Shared prefixes are represented
+once. Each trie edge is encoded as a single byte:
+
+```
+Header: 4 bytes (word count as uint32 LE)
+
+Body: 1 byte per trie edge (DFS order)
+  bits 0-4: character (0-25 for a-z)
+  bit 5:    end-of-word (this edge completes a valid word)
+  bit 6:    has children (the target node has outgoing edges)
+  bit 7:    last sibling (last child of the parent node)
+```
+
+45% smaller than gzipping the plain text.
+
+## Building
+
+```bash
+npm install
+npm run build    # compresses dictionary and builds site/
+```
+
+## Source
+
+Originally from [infochimps](https://web.archive.org/web/20131118073324/https://www.infochimps.com/datasets/word-list-350000-simple-english-words-excel-readable) via [StackOverflow](https://stackoverflow.com/questions/2213607/how-to-get-english-language-word-database).

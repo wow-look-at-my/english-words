@@ -1,0 +1,36 @@
+name: Deploy PR previews
+
+on:
+    pull_request:
+        types: [opened, reopened, synchronize, closed]
+
+permissions:
+    contents: write
+    pull-requests: write
+    pages: write
+    id-token: write
+    statuses: write
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        if: github.event.action != 'closed'
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+            - run: npm ci
+            - run: npm run build
+            - uses: actions/upload-artifact@v4
+              with:
+                  name: build
+                  path: ./site/
+
+    deploy-preview:
+        needs: build
+        if: always()
+        uses: PazerOP/pr-preview-action/.github/workflows/preview.yml@master
+        with:
+            artifact-name: build
+        secrets: inherit
