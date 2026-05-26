@@ -5,9 +5,6 @@ on:
     branches: [master]
     paths: [words_alpha.txt, src/**, package.json]
 
-permissions:
-  contents: write
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -18,9 +15,3 @@ jobs:
           node-version: 22
       - run: npm ci
       - run: npm run build
-      - run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add words_alpha.dict.bin words_alpha.dict.bin.gz decompress.js decompress.d.ts .nojekyll index.html
-          git diff --cached --quiet || git commit -m "Rebuild compressed dictionary [skip ci]"
-          git push
