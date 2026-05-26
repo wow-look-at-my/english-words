@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "compress": "tsx src/compress.ts",
-    "build:lib": "tsc",
+    "build:lib": "tsc && cp lib/decompress.js lib/decompress.d.ts .",
     "build": "npm run compress && npm run build:lib"
   },
   "devDependencies": {

@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, mkdirSync, copyFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { gzipSync } from "node:zlib";
 import { decompress } from "./decompress.js";
 
@@ -22,14 +22,12 @@ function compress(rawWords: string[]): Uint8Array {
 
   const buf: number[] = [];
 
-  // Header: magic(4) + maxLen(1) + counts(maxLen*4)
-  buf.push(69, 87, 68, 2, maxLen); // "EWD\x02"
+  buf.push(69, 87, 68, 2, maxLen);
   for (let i = 0; i < maxLen; i++) {
     const c = groups.get(i + 1)?.length ?? 0;
     buf.push(c & 0xff, (c >> 8) & 0xff, (c >> 16) & 0xff, (c >> 24) & 0xff);
   }
 
-  // Body: front-coded within each length group
   for (let len = 1; len <= maxLen; len++) {
     const g = groups.get(len);
     if (!g) continue;
@@ -54,33 +52,23 @@ function compress(rawWords: string[]): Uint8Array {
   return new Uint8Array(buf);
 }
 
-// --- Build site ---
-const siteDir = "site";
-mkdirSync(siteDir, { recursive: true });
-
+// --- Build to repo root (Pages serves from master /) ---
 const text = readFileSync("words_alpha.txt", "utf-8");
 const words = text.split(/\r?\n/).filter((w) => w.trim());
 
 const bin = compress(words);
-writeFileSync(`${siteDir}/words_alpha.dict.bin`, bin);
+writeFileSync("words_alpha.dict.bin", bin);
 
 const gz = gzipSync(Buffer.from(bin), { level: 9 });
-writeFileSync(`${siteDir}/words_alpha.dict.bin.gz`, gz);
+writeFileSync("words_alpha.dict.bin.gz", gz);
 
-for (const f of ["words_alpha.txt", "words_alpha.zip"]) {
-  try {
-    copyFileSync(f, `${siteDir}/${f}`);
-  } catch {}
-}
-
-writeFileSync(`${siteDir}/.nojekyll`, "");
+writeFileSync(".nojekyll", "");
 
 // Roundtrip verification
 const decoded = decompress(bin);
 const expected = [
   ...new Set(words.map((w) => w.toLowerCase().trim()).filter(Boolean)),
-]
-  .sort((a, b) => a.length - b.length || a.localeCompare(b));
+].sort((a, b) => a.length - b.length || a.localeCompare(b));
 
 if (decoded.length !== expected.length) {
   console.error(
@@ -112,7 +100,7 @@ console.log(
 );
 console.log("Roundtrip: OK");
 
-// Generate index.html
+// Generate index.html with accurate sizes
 const html = [
   "<!DOCTYPE html>",
   '<html lang="en">',
@@ -153,4 +141,4 @@ const html = [
   "</body>",
   "</html>",
 ].join("\n");
-writeFileSync(`${siteDir}/index.html`, html);
+writeFileSync("index.html", html);

@@ -4,7 +4,7 @@
     "module": "ES2022",
     "moduleResolution": "bundler",
     "declaration": true,
-    "outDir": "site",
+    "outDir": "lib",
     "rootDir": "src",
     "strict": true,
     "skipLibCheck": true

@@ -1,24 +1,16 @@
-name: Deploy to GitHub Pages
+name: Build dictionary
 
 on:
   push:
     branches: [master]
+    paths: [words_alpha.txt]
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: false
+  contents: write
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -26,9 +18,9 @@ jobs:
           node-version: 22
       - run: npm ci
       - run: npm run build
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: site
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add words_alpha.dict.bin words_alpha.dict.bin.gz decompress.js decompress.d.ts .nojekyll index.html
+          git diff --cached --quiet || git commit -m "Rebuild compressed dictionary [skip ci]"
+          git push

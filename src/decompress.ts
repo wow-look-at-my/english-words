@@ -3,8 +3,8 @@ export function decompress(data: Uint8Array): string[] {
     throw new Error("Invalid EWD v2 format");
   }
 
-  const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
   const maxLen = data[4];
+  const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
 
   const counts: number[] = new Array(maxLen);
   let totalWords = 0;
@@ -18,21 +18,17 @@ export function decompress(data: Uint8Array): string[] {
   let pos = 5 + maxLen * 4;
 
   for (let li = 0; li < maxLen; li++) {
-    const wordLen = li + 1;
+    const wl = li + 1;
     const count = counts[li];
     if (count === 0) continue;
 
-    const buf: number[] = new Array(wordLen).fill(0);
+    const buf: number[] = new Array(wl).fill(0);
 
     for (let w = 0; w < count; w++) {
       const shared = data[pos++];
-      for (let c = shared; c < wordLen; c++) {
-        buf[c] = data[pos++];
-      }
+      for (let c = shared; c < wl; c++) buf[c] = data[pos++];
       let word = "";
-      for (let c = 0; c < wordLen; c++) {
-        word += String.fromCharCode(97 + buf[c]);
-      }
+      for (let c = 0; c < wl; c++) word += String.fromCharCode(97 + buf[c]);
       words[wi++] = word;
     }
   }
