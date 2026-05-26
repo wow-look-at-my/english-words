@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>English Words Dictionary CDN</title>
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+<script>document.addEventListener('DOMContentLoaded', () => hljs.highlightAll());</script>
 </head>
 <body>
 <main>
@@ -42,18 +45,18 @@
 
 <h2>Usage</h2>
 <h3>Plain text</h3>
-<pre><code>const resp = await fetch('https://wow-look-at-my.github.io/english-words/words_alpha.txt');
+<pre><code class="language-javascript">const resp = await fetch('https://wow-look-at-my.github.io/english-words/words_alpha.txt');
 const words = (await resp.text()).split('\n').filter(Boolean);</code></pre>
 
 <h3>Binary format</h3>
-<pre><code>import { decompress } from 'https://wow-look-at-my.github.io/english-words/decompress.js';
+<pre><code class="language-javascript">import { decompress } from 'https://wow-look-at-my.github.io/english-words/decompress.js';
 
 const resp = await fetch('https://wow-look-at-my.github.io/english-words/words_alpha.dict.bin');
 const buf = new Uint8Array(await resp.arrayBuffer());
 const words = decompress(buf); // string[], 370,105 words sorted alphabetically</code></pre>
 
 <h3>Gzipped binary (smallest download)</h3>
-<pre><code>import { decompress } from 'https://wow-look-at-my.github.io/english-words/decompress.js';
+<pre><code class="language-javascript">import { decompress } from 'https://wow-look-at-my.github.io/english-words/decompress.js';
 
 const resp = await fetch('https://wow-look-at-my.github.io/english-words/words_alpha.dict.bin.gz');
 const ds = new DecompressionStream('gzip');
@@ -65,7 +68,7 @@ const words = decompress(buf);</code></pre>
 <p>The <code>.dict.bin</code> format is a DFS-serialized trie. The entire dictionary
 is stored as a tree where shared prefixes are represented once. Each trie edge
 is encoded as a single byte:</p>
-<pre><code>Header: 4 bytes (word count as uint32 LE)
+<pre><code class="language-plaintext">Header: 4 bytes (word count as uint32 LE)
 
 Body: 1 byte per trie edge (DFS order)
   bits 0-4: character (0-25 for a-z)
