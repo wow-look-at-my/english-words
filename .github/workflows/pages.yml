@@ -1,9 +1,9 @@
-name: Build dictionary
+name: Rebuild dictionary
 
 on:
   push:
     branches: [master]
-    paths: [words_alpha.txt]
+    paths: [words_alpha.txt, src/**, package.json]
 
 permissions:
   contents: write
