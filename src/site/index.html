@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>English Words Dictionary CDN</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+<h1>English Words Dictionary</h1>
+<p>370,105 English words. Plain text and compact binary formats, served via GitHub Pages.</p>
+
+<h2>Downloads</h2>
+<table>
+<thead>
+<tr><th>File</th><th>Format</th><th class="r">Size</th></tr>
+</thead>
+<tbody>
+<tr>
+  <td><a href="words_alpha.dict.bin">words_alpha.dict.bin</a></td>
+  <td>Binary (length-grouped, front-coded)</td>
+  <td class="r">~2 MB</td>
+</tr>
+<tr>
+  <td><a href="words_alpha.dict.bin.gz">words_alpha.dict.bin.gz</a></td>
+  <td>Gzipped binary</td>
+  <td class="r">~884 KB</td>
+</tr>
+<tr>
+  <td><a href="words_alpha.txt">words_alpha.txt</a></td>
+  <td>Plain text (one word per line)</td>
+  <td class="r">~4.1 MB</td>
+</tr>
+<tr>
+  <td><a href="decompress.js">decompress.js</a></td>
+  <td>ES module decompressor</td>
+  <td class="r">~1 KB</td>
+</tr>
+</tbody>
+</table>
+
+<h2>Usage</h2>
+<h3>Plain text</h3>
+<pre><code>const resp = await fetch('https://wow-look-at-my.github.io/english-words/words_alpha.txt');
+const words = (await resp.text()).split('\n').filter(Boolean);</code></pre>
+
+<h3>Binary format</h3>
+<pre><code>import { decompress } from 'https://wow-look-at-my.github.io/english-words/decompress.js';
+
+const resp = await fetch('https://wow-look-at-my.github.io/english-words/words_alpha.dict.bin');
+const buf = new Uint8Array(await resp.arrayBuffer());
+const words = decompress(buf); // string[], 370,105 words</code></pre>
+
+<h3>Gzipped binary (smallest download)</h3>
+<pre><code>import { decompress } from 'https://wow-look-at-my.github.io/english-words/decompress.js';
+
+const resp = await fetch('https://wow-look-at-my.github.io/english-words/words_alpha.dict.bin.gz');
+const ds = new DecompressionStream('gzip');
+const decompressed = resp.body.pipeThrough(ds);
+const buf = new Uint8Array(await new Response(decompressed).arrayBuffer());
+const words = decompress(buf);</code></pre>
+
+<h2>Binary format spec (EWD v2)</h2>
+<p>Words are grouped by character length. Within each group, words are sorted
+alphabetically and front-coded against the previous word. Characters are stored
+as byte values 0&ndash;25 (a&ndash;z). No separators or terminators are needed
+since all words in a group share the same length.</p>
+<pre><code>Header:
+  bytes 0-3    magic "EWD\x02"
+  byte  4      max_len (maximum word length)
+  bytes 5..    max_len x uint32le (word count per length)
+
+Body (per group, length L, count C):
+  C words, each encoded as:
+    1 byte: shared prefix length with previous word
+    (L - shared) bytes: suffix characters (0-25)
+</code></pre>
+
+<h2>Source</h2>
+<p><a href="https://github.com/wow-look-at-my/english-words">github.com/wow-look-at-my/english-words</a></p>
+</main>
+</body>
+</html>
