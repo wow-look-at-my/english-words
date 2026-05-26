@@ -7,7 +7,7 @@ Served via GitHub Pages as a lightweight dictionary CDN.
 
 ## CDN Usage
 
-The binary format (`words_alpha.dict.bin`) is ~1 MB raw, ~589 KB gzipped.
+The binary format (`words_alpha.dict.bin`) is 1004 KB raw, 589 KB gzipped.
 A TypeScript decompressor is provided:
 
 ```typescript
@@ -22,9 +22,9 @@ const words = decompress(buf); // string[], 370105 words sorted alphabetically
 
 | File | Format | Size |
 |------|--------|------|
-| `words_alpha.dict.bin` | Binary (DFS-serialized trie) | ~1 MB |
-| `words_alpha.dict.bin.gz` | Gzipped binary | ~589 KB |
-| `words_alpha.txt` | Plain text (one word per line) | 4.1 MB |
+| `words_alpha.dict.bin` | Binary (DFS-serialized trie) | 1004 KB |
+| `words_alpha.dict.bin.gz` | Gzipped binary | 589 KB |
+| `words_alpha.txt` | Plain text (one word per line) | 4136 KB |
 
 ## Binary Format
 

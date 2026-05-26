@@ -20,22 +20,22 @@
 <tr>
   <td><a href="words_alpha.dict.bin">words_alpha.dict.bin</a></td>
   <td>Binary (DFS-serialized trie)</td>
-  <td class="r">~1 MB</td>
+  <td class="r">1004 KB</td>
 </tr>
 <tr>
   <td><a href="words_alpha.dict.bin.gz">words_alpha.dict.bin.gz</a></td>
   <td>Gzipped binary</td>
-  <td class="r">~589 KB</td>
+  <td class="r">589 KB</td>
 </tr>
 <tr>
   <td><a href="words_alpha.txt">words_alpha.txt</a></td>
   <td>Plain text (one word per line)</td>
-  <td class="r">~4.1 MB</td>
+  <td class="r">4136 KB</td>
 </tr>
 <tr>
   <td><a href="decompress.js">decompress.js</a></td>
   <td>ES module decompressor</td>
-  <td class="r">~0.5 KB</td>
+  <td class="r">1 KB</td>
 </tr>
 </tbody>
 </table>
@@ -72,7 +72,7 @@ Body: 1 byte per trie edge (DFS order)
   bit 5:    end-of-word (this edge completes a valid word)
   bit 6:    has children (the target node has outgoing edges)
   bit 7:    last sibling (last child of the parent node)</code></pre>
-<p>1 MB raw, 589 KB gzipped &mdash; 45% smaller than gzipping the plain text.</p>
+<p>1004 KB raw, 589 KB gzipped &mdash; 45% smaller than gzipping the plain text.</p>
 
 <h2>Source</h2>
 <p><a href="https://github.com/wow-look-at-my/english-words">github.com/wow-look-at-my/english-words</a></p>
