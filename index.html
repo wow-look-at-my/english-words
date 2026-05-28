@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>English Words Dictionary CDN</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+<script>document.addEventListener('DOMContentLoaded', () => hljs.highlightAll());</script>
+</head>
+<body>
+<main>
+<h1>English Words Dictionary</h1>
+<p>370,105 English words. Plain text and compact binary formats, served via GitHub Pages.</p>
+
+<h2>Downloads</h2>
+<table>
+<thead>
+<tr><th>File</th><th>Format</th><th class="r">Size</th></tr>
+</thead>
+<tbody>
+<tr>
+  <td><a href="words_alpha.dict.bin">words_alpha.dict.bin</a></td>
+  <td>Binary (DFS-serialized trie)</td>
+  <td class="r">1004 KB</td>
+</tr>
+<tr>
+  <td><a href="words_alpha.dict.bin.gz">words_alpha.dict.bin.gz</a></td>
+  <td>Gzipped binary</td>
+  <td class="r">589 KB</td>
+</tr>
+<tr>
+  <td><a href="words_alpha.txt">words_alpha.txt</a></td>
+  <td>Plain text (one word per line)</td>
+  <td class="r">4136 KB</td>
+</tr>
+<tr>
+  <td><a href="decompress.js">decompress.js</a></td>
+  <td>ES module decompressor</td>
+  <td class="r">1 KB</td>
+</tr>
+</tbody>
+</table>
+
+<h2>Usage</h2>
+<h3>Plain text</h3>
+<pre><code class="language-javascript">const resp = await fetch('https://wow-look-at-my.github.io/english-words/words_alpha.txt');
+const words = (await resp.text()).split('\n').filter(Boolean);</code></pre>
+
+<h3>Binary format</h3>
+<pre><code class="language-javascript">import { decompress } from 'https://wow-look-at-my.github.io/english-words/decompress.js';
+
+const resp = await fetch('https://wow-look-at-my.github.io/english-words/words_alpha.dict.bin');
+const buf = new Uint8Array(await resp.arrayBuffer());
+const words = decompress(buf); // string[], 370,105 words sorted alphabetically</code></pre>
+
+<h3>Gzipped binary (smallest download)</h3>
+<pre><code class="language-javascript">import { decompress } from 'https://wow-look-at-my.github.io/english-words/decompress.js';
+
+const resp = await fetch('https://wow-look-at-my.github.io/english-words/words_alpha.dict.bin.gz');
+const ds = new DecompressionStream('gzip');
+const decompressed = resp.body.pipeThrough(ds);
+const buf = new Uint8Array(await new Response(decompressed).arrayBuffer());
+const words = decompress(buf);</code></pre>
+
+<h2>Binary format spec</h2>
+<p>The <code>.dict.bin</code> format is a DFS-serialized trie. The entire dictionary
+is stored as a tree where shared prefixes are represented once. Each trie edge
+is encoded as a single byte:</p>
+<pre><code class="language-plaintext">Header: 4 bytes (word count as uint32 LE)
+
+Body: 1 byte per trie edge (DFS order)
+  bits 0-4: character (0-25 for a-z)
+  bit 5:    end-of-word (this edge completes a valid word)
+  bit 6:    has children (the target node has outgoing edges)
+  bit 7:    last sibling (last child of the parent node)</code></pre>
+<p>1004 KB raw, 589 KB gzipped &mdash; 45% smaller than gzipping the plain text.</p>
+
+<h2>Source</h2>
+<p><a href="https://github.com/wow-look-at-my/english-words">github.com/wow-look-at-my/english-words</a></p>
+</main>
+<script>(function(){var q=location.search;if(!q)return;document.addEventListener("click",function(e){var a=e.target.closest("a");if(!a)return;var h=a.getAttribute("href");if(!h||h.startsWith("#")||/^[a-z][a-z0-9+.-]*:/i.test(h))return;try{var u=new URL(h,location.href);if(u.origin!==location.origin)return;if(!u.search)u.search=q;a.href=u.pathname+u.search+u.hash}catch(e){}})})();</script></body>
+</html>
