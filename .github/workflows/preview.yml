@@ -13,6 +13,7 @@ permissions:
     pages: write
     id-token: write
     statuses: write
+    actions: read
 
 jobs:
     build:
