@@ -13,6 +13,9 @@ permissions:
     pages: write
     id-token: write
     statuses: write
+    # Required by the called pr-preview-action reusable workflow (artifact download via the Actions REST API).
+    # Without it the caller cannot satisfy the callee's declared permissions and every run dies at startup_failure.
+    actions: read
 
 jobs:
     build:
